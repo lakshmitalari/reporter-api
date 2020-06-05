@@ -13,6 +13,7 @@ class uploadController extends Controller
     public function uploadFiles(Request $request)
     {
         $ext_upload_id = implode($request->only(['ext_upload_id']));
+        $ext_upload_item_id = implode($request->only(['ext_upload_item_id']));
 
         $extUploadID = DB::table('uploads')
                                 ->where('ext_upload_id', $ext_upload_id)
@@ -25,7 +26,12 @@ class uploadController extends Controller
             ]);
         }
         else {
-            
+            $Uploads = new uploads;
+            $Uploads -> ext_upload_id = $request->ext_upload_id;
+            $Uploads -> save();
+            return response()->json([
+                'data' => $Uploads,
+            ]);
         }
         }
 }
