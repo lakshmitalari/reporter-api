@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class uploadFiles extends Model
 {
-    //
     protected $table = 'upload_files';
     
     protected $fillable = [

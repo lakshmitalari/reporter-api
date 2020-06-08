@@ -49,11 +49,11 @@ class uploadController extends Controller
             else {
                 $uploadFiles = new uploadFiles;
                 
-                $uploadFiles -> ext_upload_item_id = $row['ext_upload_item_id'];
-                $uploadFiles -> file_name = $row['file_name'];
-                $uploadFiles -> file_type = $row['file_type'];
-                $uploadFiles -> file_size = $row['file_size'];
-                $uploadFiles -> upload_url= $row['upload_url'];
+                $uploadFiles -> ext_upload_item_id  = $row['ext_upload_item_id'];
+                $uploadFiles -> file_name           = $row['file_name'];
+                $uploadFiles -> file_type           = $row['file_type'];
+                $uploadFiles -> file_size           = $row['file_size'];
+                $uploadFiles -> upload_url          = $row['upload_url'];
                 
                 $uploadFiles -> save();
             }
