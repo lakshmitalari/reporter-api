@@ -60,7 +60,7 @@ class uploadController extends Controller
         }
         return response()->json([
             'uploads'       => $Uploads,
-            'upload_files'  => $upload_items,
+            'upload_files'  => $uploadFiles,
         ]);
     }
 }
