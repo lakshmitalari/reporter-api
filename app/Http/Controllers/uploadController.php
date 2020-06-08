@@ -13,7 +13,6 @@ class uploadController extends Controller
     public function uploadFiles(Request $request)
     {
         $ext_upload_id = implode($request->only(['ext_upload_id']));
-        $ext_upload_item_id = implode($request->only(['ext_upload_item_id']));
 
         $extUploadID = DB::table('uploads')
                                 ->where('ext_upload_id', $ext_upload_id)
@@ -29,9 +28,39 @@ class uploadController extends Controller
             $Uploads = new uploads;
             $Uploads -> ext_upload_id = $request->ext_upload_id;
             $Uploads -> save();
-            return response()->json([
-                'data' => $Uploads,
-            ]);
         }
+
+        $upload_items = json_decode($request->input('upload_items'), TRUE);
+
+        foreach($upload_items["data"] as $row)
+        {
+            $ext_upload_item_id = $row['ext_upload_item_id'];
+            
+            $extUploadItemID = DB::table('upload_files')
+                                        ->where('ext_upload_item_id', $ext_upload_item_id)
+                                        ->value('ext_upload_item_id');
+
+            if ($ext_upload_item_id == $extUploadItemID) {
+                return response()->json([
+                    'ext_upload_item_id' => $extUploadItemID,
+                    'message'            => 'error in upload files, files already present',
+                ]);
+            }
+            else {
+                $uploadFiles = new uploadFiles;
+                
+                $uploadFiles -> ext_upload_item_id = $row['ext_upload_item_id'];
+                $uploadFiles -> file_name = $row['file_name'];
+                $uploadFiles -> file_type = $row['file_type'];
+                $uploadFiles -> file_size = $row['file_size'];
+                $uploadFiles -> upload_url= $row['upload_url'];
+                
+                $uploadFiles -> save();
+            }
         }
+        return response()->json([
+            'uploads'       => $Uploads,
+            'upload_files'  => $upload_items,
+        ]);
+    }
 }
