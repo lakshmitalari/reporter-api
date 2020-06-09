@@ -13,16 +13,24 @@ class uploadController extends Controller
     public function uploadFiles(Request $request)
     {
         $ext_upload_id = implode($request->only(['ext_upload_id']));
-        $upload_items = json_decode($request->input('upload_items'), TRUE);
-        $uploadItemFound = false;
-        
-        // Check if uploads available;
-        
+
         $extUploadID = DB::table('uploads')
                                 ->where('ext_upload_id', $ext_upload_id)
                                 ->value('ext_upload_id');
 
-        // Check if upload_items available;
+        if ($ext_upload_id == $extUploadID) {
+            return response()->json([
+                'ext_upload_id' => $extUploadID,
+                'message'       => 'ext_upload_id already present',
+            ]);
+        }
+        else {
+            $Uploads = new uploads;
+            $Uploads -> ext_upload_id = $request->ext_upload_id;
+            $Uploads -> save();
+        }
+
+        $upload_items = json_decode($request->input('upload_items'), TRUE);
 
         foreach($upload_items["data"] as $row)
         {
@@ -33,36 +41,13 @@ class uploadController extends Controller
                                         ->value('ext_upload_item_id');
                                         
             if ($ext_upload_item_id == $extUploadItemID) {
-                
-                $uploadItemFound = true;
                 return response()->json([
                     'ext_upload_item_id' => $extUploadItemID,
                     'message'            => 'error in upload files, files already present',
                 ]);
             }
-        }
-
-        // Insert to uploads
-
-        if ($ext_upload_id == $extUploadID && $uploadItemFound) {
-            return response()->json([
-                'ext_upload_id' => $extUploadID,
-                'message'       => 'ext_upload_id already present',
-            ]);
-        }
-
-        else {
-            $Uploads = new uploads;
-            $Uploads -> ext_upload_id = $request->ext_upload_id;
-            $Uploads -> save();
-        }
-
-        // Insert to uploadFiles
-
-        if(!$uploadItemFound)
-        {
-            foreach($upload_items["data"] as $row) {
-                
+            
+            else {
                 $uploadFiles = new uploadFiles;
                 
                 $uploadFiles -> ext_upload_item_id  = $row['ext_upload_item_id'];
@@ -74,7 +59,7 @@ class uploadController extends Controller
                 $uploadFiles -> save();
             }
         }
-        
+
         return response()->json([
             'uploads'       => $Uploads,
             'upload_files'  => $upload_items,
