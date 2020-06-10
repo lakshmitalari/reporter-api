@@ -10,9 +10,9 @@ use Aws\Exception\AwsException;
 
 class uploadController extends Controller
 {
-    public function signedURL()
+
+    public function signedURL($file_name)
     {
-        
         $s3Client = new S3Client([
             'region'    => env('AWS_DEFAULT_REGION'),
             'version'   => 'latest',
@@ -20,12 +20,14 @@ class uploadController extends Controller
 
         $cmd = $s3Client->getCommand('GetObject', [
             'Bucket'    => env('AWS_BUCKET'),
-            'Key'       => 'file_name.ext',
+            'Key'       => $file_name,
         ]);
 
         $requestURL = $s3Client->createPresignedRequest($cmd, '+10 minutes');
 
         $signedURL = (string)$requestURL->getUri();
+
+        return $signedURL;
     }
 
     public function uploadFiles(Request $request)
@@ -75,16 +77,20 @@ class uploadController extends Controller
             $Uploads -> save();
        
         // Insert to uploadFiles
-        
+
             foreach($upload_items["data"] as $row) {
+
+                $file_name = $row['file_name'];
                 
+                $uploadURL = $this->signedURL($file_name);
+
                 $uploadFiles = new uploadFiles;
                 
                 $uploadFiles -> ext_upload_item_id  = $row['ext_upload_item_id'];
                 $uploadFiles -> file_name           = $row['file_name'];
                 $uploadFiles -> file_type           = $row['file_type'];
                 $uploadFiles -> file_size           = $row['file_size'];
-                $uploadFiles -> upload_url          = $row['upload_url'];
+                $uploadFiles -> upload_url          = $uploadURL;
                 
                 $uploadFiles -> save();
             }
