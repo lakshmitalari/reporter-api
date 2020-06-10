@@ -33,12 +33,19 @@ class uploadController extends Controller
         $ext_upload_id = implode($request->only(['ext_upload_id']));
         $upload_items = json_decode($request->input('upload_items'), TRUE);
         $uploadItemFound = false;
+        $uploadFound = false;
         
         // Check if uploads available;
-        
         $extUploadID = DB::table('uploads')
                                 ->where('ext_upload_id', $ext_upload_id)
                                 ->value('ext_upload_id');
+        if($ext_upload_id == $extUploadID) {
+            $uploadFound = true;
+            return response()->json([
+                'ext_upload_id'     => $extUploadID,
+                'message'           => 'error in uploads, upload id already present',
+            ]);
+        }
 
         // Check if upload_items available;
 
@@ -55,21 +62,14 @@ class uploadController extends Controller
                 $uploadItemFound = true;
                 return response()->json([
                     'ext_upload_item_id' => $extUploadItemID,
-                    'message'            => 'error in upload files, files already present',
+                    'message'            => 'error in upload files, upload item id already present',
                 ]);
             }
         }
 
         // Insert to uploads
 
-        if ($ext_upload_id == $extUploadID && $uploadItemFound) {
-            return response()->json([
-                'ext_upload_id' => $extUploadID,
-                'message'       => 'ext_upload_id already present',
-            ]);
-        }
-
-        else {
+        if(!$uploadFound && !$uploadItemFound) {
             $Uploads = new uploads;
             $Uploads -> ext_upload_id = $request->ext_upload_id;
             $Uploads -> save();
@@ -77,7 +77,7 @@ class uploadController extends Controller
 
         // Insert to uploadFiles
 
-        if(!$uploadItemFound)
+        if(!$uploadFound && !$uploadItemFound)
         {
             foreach($upload_items["data"] as $row) {
                 
@@ -93,6 +93,8 @@ class uploadController extends Controller
             }
         }
         
+        // Return after DB store
+
         return response()->json([
             'uploads'       => $Uploads,
             'upload_files'  => $upload_items,
