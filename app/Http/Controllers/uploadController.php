@@ -10,6 +10,24 @@ use Aws\Exception\AwsException;
 
 class uploadController extends Controller
 {
+    public function signedURL()
+    {
+        
+        $s3Client = new S3Client([
+            'region'    => env('AWS_DEFAULT_REGION'),
+            'version'   => 'latest',
+        ]);
+
+        $cmd = $s3Client->getCommand('GetObject', [
+            'Bucket'    => env('AWS_BUCKET'),
+            'Key'       => 'file_name.ext',
+        ]);
+
+        $requestURL = $s3Client->createPresignedRequest($cmd, '+10 minutes');
+
+        $signedURL = (string)$requestURL->getUri();
+    }
+
     public function uploadFiles(Request $request)
     {
         $ext_upload_id = implode($request->only(['ext_upload_id']));
