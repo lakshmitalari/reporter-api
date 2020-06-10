@@ -77,7 +77,9 @@ class uploadController extends Controller
             $Uploads -> save();
        
         // Insert to uploadFiles
-
+            
+            $arruploadItems = array();
+            
             foreach($upload_items["data"] as $row) {
 
                 $file_name = $row['file_name'];
@@ -93,14 +95,16 @@ class uploadController extends Controller
                 $uploadFiles -> upload_url          = $uploadURL;
                 
                 $uploadFiles -> save();
+
+                $arruploadItems[] = $uploadFiles;
             }
         }
         
-        // Return after DB store
+        //Return after DB store
 
         return response()->json([
             'uploads'       => $Uploads,
-            'upload_files'  => $upload_items,
+            'upload_files'  => $arruploadItems,
         ]);
     }
 }
