@@ -73,12 +73,9 @@ class uploadController extends Controller
             $Uploads = new uploads;
             $Uploads -> ext_upload_id = $request->ext_upload_id;
             $Uploads -> save();
-        }
-
+       
         // Insert to uploadFiles
-
-        if(!$uploadFound && !$uploadItemFound)
-        {
+        
             foreach($upload_items["data"] as $row) {
                 
                 $uploadFiles = new uploadFiles;
