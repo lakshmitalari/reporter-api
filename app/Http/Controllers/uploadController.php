@@ -9,7 +9,25 @@ use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
 
 class uploadController extends Controller
-{
+{   
+    public function ifExists(Request $request)
+    {
+        $existing_upload_id = implode($request->only(['ext_upload_id']));
+        $existing_upload_items = json_decode($request->input('upload_items'), TRUE);
+
+        $existingUploads = DB::table('uploads')
+                                    ->where('ext_upload_id', $existing_upload_id)
+                                    ->delete();
+        
+        foreach($existing_upload_items["data"] as $row)
+        {
+            $existing_ext_upload_item_id = $row['ext_upload_item_id'];
+            
+            $existingUploadItems = DB::table('upload_files')
+                                        ->where('ext_upload_item_id', $existing_ext_upload_item_id)
+                                        ->delete();
+        }
+    }
 
     public function signedURL($file_name)
     {
@@ -34,14 +52,22 @@ class uploadController extends Controller
     {
         $ext_upload_id = implode($request->only(['ext_upload_id']));
         $upload_items = json_decode($request->input('upload_items'), TRUE);
+        $retry_upload = implode($request->only(['retry']));
         $uploadItemFound = false;
         $uploadFound = false;
         
-        // Check if uploads available;
         $extUploadID = DB::table('uploads')
                                 ->where('ext_upload_id', $ext_upload_id)
                                 ->value('ext_upload_id');
-        if($ext_upload_id == $extUploadID) {
+
+        if($ext_upload_id == $extUploadID && $retry_upload == "true") 
+        {
+            $this->ifExists($request);
+            $uploadFound = false;
+        }
+        
+        else if ($ext_upload_id == $extUploadID)
+        {
             $uploadFound = true;
             return response()->json([
                 'ext_upload_id'     => $extUploadID,
@@ -59,7 +85,8 @@ class uploadController extends Controller
                                         ->where('ext_upload_item_id', $ext_upload_item_id)
                                         ->value('ext_upload_item_id');
                                         
-            if ($ext_upload_item_id == $extUploadItemID) {
+            if ($ext_upload_item_id == $extUploadItemID) 
+            {
                 
                 $uploadItemFound = true;
                 return response()->json([
