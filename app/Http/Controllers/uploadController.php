@@ -60,6 +60,8 @@ class uploadController extends Controller
                                 ->where('ext_upload_id', $ext_upload_id)
                                 ->value('ext_upload_id');
 
+        // check if rety flag added
+
         if($ext_upload_id == $extUploadID && $retry_upload == "true") 
         {
             $this->ifExists($request);
