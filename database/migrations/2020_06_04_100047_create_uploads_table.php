@@ -21,7 +21,7 @@ class CreateUploadsTable extends Migration
         Schema::create('upload_files', function (Blueprint $table) {
             $table->id();
             $table->string('ext_upload_item_id');
-            $table->integer('upload_id')->unsigned()->index();
+            $table->bigInteger('upload_id')->unsigned();
             $table->string('file_name');
             $table->string('file_type');
             $table->bigInteger('file_size');

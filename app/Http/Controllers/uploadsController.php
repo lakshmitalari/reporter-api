@@ -8,7 +8,7 @@ use App\uploadFiles;
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
 
-class uploadController extends Controller
+class uploadsController extends Controller
 {   
 
     /**
@@ -131,7 +131,6 @@ class uploadController extends Controller
                 $uploadFiles -> file_type           = $row['file_type'];
                 $uploadFiles -> file_size           = $row['file_size'];
                 $uploadFiles -> upload_url          = $uploadURL;
-                $uploadFiles -> uploadItems()->save($Uploads);
                 $uploadFiles -> save();
                 // Create array from uploadFiles
                 $arruploadItems[] = $uploadFiles;

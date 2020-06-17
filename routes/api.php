@@ -14,4 +14,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('uploadFiles', 'uploadController@uploadFiles');
+Route::post('uploadFiles', 'uploadsController@uploadFiles');
+Route::post('CreateArticles','articlesController@createArticles');
