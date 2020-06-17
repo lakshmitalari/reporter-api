@@ -10,6 +10,11 @@ use Aws\Exception\AwsException;
 
 class uploadController extends Controller
 {   
+
+    /**
+     * Remove ifExists
+     * Executes when true flag is present
+     */
     public function ifExists(Request $request)
     {
         $existing_upload_id = implode($request->only(['ext_upload_id']));
@@ -29,6 +34,10 @@ class uploadController extends Controller
         }
     }
 
+    /**
+     * Get signedURL form AWS
+     * Return signedURL
+     */
     public function signedURL($file_name)
     {
         $s3Client = new S3Client([
@@ -48,6 +57,11 @@ class uploadController extends Controller
         return $signedURL;
     }
 
+    /**
+     * Executes uploadFiles
+     * Checks if retry is there
+     * 
+     */
     public function uploadFiles(Request $request)
     {
         $ext_upload_id = implode($request->only(['ext_upload_id']));
@@ -60,14 +74,13 @@ class uploadController extends Controller
                                 ->where('ext_upload_id', $ext_upload_id)
                                 ->value('ext_upload_id');
 
-        // check if rety flag added
-
+        // Check if rety set to true && uploads available
         if($ext_upload_id == $extUploadID && $retry_upload == "true") 
         {
             $this->ifExists($request);
             $uploadFound = false;
         }
-        
+        // Check if uploads available only
         else if ($ext_upload_id == $extUploadID)
         {
             $uploadFound = true;
@@ -77,8 +90,7 @@ class uploadController extends Controller
             ]);
         }
 
-        // Check if upload_items available;
-
+        // Check if upload_items available
         foreach($upload_items["data"] as $row)
         {
             $ext_upload_item_id = $row['ext_upload_item_id'];
@@ -86,7 +98,8 @@ class uploadController extends Controller
             $extUploadItemID = DB::table('upload_files')
                                         ->where('ext_upload_item_id', $ext_upload_item_id)
                                         ->value('ext_upload_item_id');
-                                        
+
+            // If upload_items available                             
             if ($ext_upload_item_id == $extUploadItemID) 
             {
                 
@@ -98,39 +111,34 @@ class uploadController extends Controller
             }
         }
 
-        // Insert to uploads
-
+        // Insert to uploads & uploadFiles
         if(!$uploadFound && !$uploadItemFound) {
             $Uploads = new uploads;
             $Uploads -> ext_upload_id = $request->ext_upload_id;
             $Uploads -> save();
        
         // Insert to uploadFiles
-            
             $arruploadItems = array();
-            
+
+            // Looping through uploadFiles hash
             foreach($upload_items["data"] as $row) {
 
                 $file_name = $row['file_name'];
-                
                 $uploadURL = $this->signedURL($file_name);
-
                 $uploadFiles = new uploadFiles;
-                
                 $uploadFiles -> ext_upload_item_id  = $row['ext_upload_item_id'];
                 $uploadFiles -> file_name           = $row['file_name'];
                 $uploadFiles -> file_type           = $row['file_type'];
                 $uploadFiles -> file_size           = $row['file_size'];
                 $uploadFiles -> upload_url          = $uploadURL;
-                
+                $uploadFiles -> uploadItems()->save($Uploads);
                 $uploadFiles -> save();
-
+                // Create array from uploadFiles
                 $arruploadItems[] = $uploadFiles;
             }
         }
-        
-        //Return after DB store
 
+        //Response after execution
         return response()->json([
             'uploads'       => $Uploads,
             'upload_files'  => $arruploadItems,

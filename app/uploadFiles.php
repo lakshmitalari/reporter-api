@@ -10,6 +10,7 @@ class uploadFiles extends Model
     
     protected $fillable = [
         'ext_upload_item_id',
+        'upload_id',
         'file_name',
         'file_type',
         'file_size',

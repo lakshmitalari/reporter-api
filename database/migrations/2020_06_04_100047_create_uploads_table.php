@@ -3,24 +3,31 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
-class CreateUploadFilesTable extends Migration
+class CreateUploadsTable extends Migration
 {
     /**
-     * Run the migrations.
+     * Run the migrations for uploads & upload_files table
      *
      * @return void
      */
     public function up()
     {
+        Schema::create('uploads', function (Blueprint $table) {
+            $table->id();
+            $table->string('ext_upload_id');
+            $table->timestamps();
+        });
+        
         Schema::create('upload_files', function (Blueprint $table) {
             $table->id();
             $table->string('ext_upload_item_id');
+            $table->integer('upload_id')->unsigned()->index();
             $table->string('file_name');
             $table->string('file_type');
             $table->bigInteger('file_size');
             $table->text('upload_url');
             $table->timestamps();
+            $table->foreign('upload_id')->references('id')->on('uploads')->onDelete('cascade');
         });
     }
 
